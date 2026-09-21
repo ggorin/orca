@@ -16,6 +16,7 @@ export const RunUseParams = z.object({
 export const RunCurrentParams = z.object({ from: requiredString('Missing coordinator terminal') })
 
 export const RunListParams = z.object({
+  repoIds: z.array(z.string().min(1).max(512)).min(1).max(100).optional(),
   limit: z.number().int().min(1).max(ORCHESTRATION_RUN_PAGE_LIMIT).optional(),
   cursor: z.string().min(1).optional()
 })

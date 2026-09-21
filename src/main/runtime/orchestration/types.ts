@@ -41,6 +41,8 @@ export type GateStatus = 'pending' | 'resolved' | 'timeout'
 export type CoordinatorStatus = 'idle' | 'running' | 'completed' | 'failed'
 
 export type RunRow = {
+  repo_id?: string | null
+  worktree_id?: string | null
   id: string
   objective: string
   home_database: string

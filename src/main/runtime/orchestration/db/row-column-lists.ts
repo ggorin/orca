@@ -8,6 +8,8 @@ import type { DispatchContextRow, RunRow, TaskRow } from '../types'
 // and `row-column-lists.test.ts` pins list↔schema against a freshly migrated database.
 
 export const RUN_COLUMNS = [
+  'repo_id',
+  'worktree_id',
   'id',
   'objective',
   'home_database',

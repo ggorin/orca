@@ -67,9 +67,9 @@ export function getRunMailboxOwnerIdsForHandle(
 
 export function listRuns(
   this: OrchestrationDb,
-  params: { limit?: number; cursor?: string } = {}
+  params: { limit?: number; cursor?: string; repoIds?: string[] } = {}
 ): RunListPage {
-  if (params.limit === undefined && params.cursor === undefined) {
+  if (params.limit === undefined && params.cursor === undefined && params.repoIds === undefined) {
     const rows = this.db
       .prepare('SELECT * FROM runs ORDER BY created_at DESC, id DESC')
       .all() as RunRow[]
@@ -80,20 +80,26 @@ export function listRuns(
     ORCHESTRATION_RUN_PAGE_LIMIT
   )
   const cursor = params.cursor ? decodeRunListCursor(params.cursor) : undefined
-  const rows = (
-    cursor
-      ? this.db
-          .prepare(
-            `SELECT * FROM runs
-           WHERE created_at < ? OR (created_at = ? AND id < ?)
-           ORDER BY created_at DESC, id DESC
-           LIMIT ?`
-          )
-          .all(cursor.createdAt, cursor.createdAt, cursor.id, limit + 1)
-      : this.db
-          .prepare('SELECT * FROM runs ORDER BY created_at DESC, id DESC LIMIT ?')
-          .all(limit + 1)
-  ) as RunRow[]
+  if (params.repoIds?.length === 0) {
+    return { runs: [], nextCursor: null }
+  }
+  const conditions: string[] = []
+  const values: (string | number)[] = []
+  if (params.repoIds) {
+    conditions.push(`repo_id IN (${params.repoIds.map(() => '?').join(',')})`)
+    values.push(...params.repoIds)
+  }
+  if (cursor) {
+    conditions.push('(created_at < ? OR (created_at = ? AND id < ?))')
+    values.push(cursor.createdAt, cursor.createdAt, cursor.id)
+  }
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
+  // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: projection is the RunRow column list from the migrated runs table.
+  const rows = this.db
+    .prepare(
+      `SELECT ${RUN_COLUMN_LIST} FROM runs ${where} ORDER BY created_at DESC, id DESC LIMIT ?`
+    )
+    .all(...values, limit + 1) as RunRow[]
   const hasMore = rows.length > limit
   const pageRows = hasMore ? rows.slice(0, limit) : rows
   return {

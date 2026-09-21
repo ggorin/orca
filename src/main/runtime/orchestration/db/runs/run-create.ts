@@ -8,6 +8,8 @@ export function createRun(
   this: OrchestrationDb,
   params: {
     objective: string
+    repoId?: string | null
+    worktreeId?: string | null
     coordinatorHandle: string
     coordinatorPaneKey: string
   }
@@ -20,10 +22,17 @@ export function createRun(
       .prepare(
         `INSERT INTO runs (
            id, objective, coordinator_handle, coordinator_pane_key,
-           consumer_generation, legacy
-         ) VALUES (?, ?, ?, ?, 1, 0)`
+           consumer_generation, legacy, repo_id, worktree_id
+         ) VALUES (?, ?, ?, ?, 1, 0, ?, ?)`
       )
-      .run(id, params.objective, params.coordinatorHandle, params.coordinatorPaneKey)
+      .run(
+        id,
+        params.objective,
+        params.coordinatorHandle,
+        params.coordinatorPaneKey,
+        params.repoId ?? null,
+        params.worktreeId ?? null
+      )
     this.rememberRunCoordinatorHandle(id, params.coordinatorHandle)
     this.db.exec('COMMIT')
   } catch (error) {

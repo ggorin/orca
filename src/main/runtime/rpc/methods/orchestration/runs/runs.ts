@@ -14,16 +14,37 @@ export const ORCHESTRATION_RUN_METHODS = [
   defineMethod({
     name: 'orchestration.runCreate',
     params: RunCreateParams,
-    handler: (params, { orchestrationCompatibilityEvidence, runtime }) => {
+    handler: async (params, { orchestrationCompatibilityEvidence, runtime }) => {
       const paneKey = resolveOrchestrationCaller(runtime, {
         callerTerminalHandle: params.from,
         callerEvidence: orchestrationCompatibilityEvidence,
         requireStablePane: true
       })
       const db = runtime.getOrchestrationDb()
+      const worktreeId = runtime.getTerminalWorktreeIdForHandle(params.from)
+      let repoId: string | null = null
+      if (worktreeId) {
+        try {
+          repoId = (await runtime.showManagedWorktree(`id:${worktreeId}`)).repoId
+        } catch {
+          // Attribution is optional: removed, floating or ambiguous workspaces still support Runs.
+        }
+      }
+      // Recheck authority after resolving a workspace across an asynchronous host boundary.
+      if (
+        runtime.getTerminalPaneKey(params.from) !== paneKey ||
+        runtime.getTerminalWorktreeIdForHandle(params.from) !== worktreeId
+      ) {
+        throw new OrchestrationError(
+          'consumer_fenced',
+          'Coordinator changed while resolving its workspace.'
+        )
+      }
       const priorRun = db.getCurrentRunForPane(paneKey)
       const run = db.createRun({
         objective: params.objective,
+        repoId,
+        worktreeId,
         coordinatorHandle: params.from,
         coordinatorPaneKey: paneKey
       })

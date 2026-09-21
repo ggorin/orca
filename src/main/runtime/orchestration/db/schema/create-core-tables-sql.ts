@@ -3,6 +3,8 @@ import { LEGACY_RUN_ID } from '../contract-constants'
 export function createCoreTablesSql(): string {
   return `
 CREATE TABLE IF NOT EXISTS runs (
+  repo_id               TEXT,
+  worktree_id           TEXT,
   id                    TEXT PRIMARY KEY,
   objective             TEXT NOT NULL,
   home_database         TEXT NOT NULL DEFAULT 'this_database',

@@ -1,3 +1,4 @@
+import { migrateV42 } from './migrate-v42'
 import { resolveOrchestrationMigrationStartVersion } from '../../orchestration-schema-version-skew'
 import { SCHEMA_VERSION } from '../contract-constants'
 import type { OrchestrationDb } from '../orchestration-db'
@@ -38,6 +39,7 @@ export function migrate(this: OrchestrationDb): void {
     migrateV40.call(this, current)
     // Why: older steps recreate the unique index; v41 must run after them.
     migrateV41.call(this, current)
+    migrateV42.call(this, current)
     this.createMailboxDeliveryIndexesIfPossible()
     // Why: rebuild steps above RENAME the table, which SQLite refuses while a view names it.
     this.db.exec(DERIVED_DELIVERY_SCHEMA_SQL)

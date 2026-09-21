@@ -72,6 +72,65 @@ describe('orchestration RPC methods', () => {
   })
 
   describe('lightweight Runs', () => {
+    it('creates an unscoped Run when read-only attribution fails', async () => {
+      setup(false)
+      vi.spyOn(runtime, 'getTerminalWorktreeIdForHandle').mockReturnValue('removed-workspace')
+      vi.spyOn(runtime, 'showManagedWorktree').mockRejectedValue(new Error('selector_not_found'))
+      const launchResolver = vi.spyOn(runtime, 'showTerminalWorkspaceLaunchScope')
+      expect(
+        await call('orchestration.runCreate', { objective: 'Ship', from: 'term_coord' })
+      ).toMatchObject({ run: { repo_id: null, worktree_id: 'removed-workspace' } })
+      expect(launchResolver).not.toHaveBeenCalled()
+    })
+
+    it('derives project scope from the live terminal rather than caller-supplied ids', async () => {
+      setup(false)
+      vi.spyOn(runtime, 'getTerminalWorktreeIdForHandle').mockReturnValue('workspace')
+      vi.spyOn(runtime, 'showManagedWorktree').mockResolvedValue({
+        id: 'workspace',
+        repoId: 'runtime-repo',
+        path: '/repo',
+        head: '',
+        branch: 'main',
+        isBare: false,
+        isMainWorktree: true,
+        displayName: 'P',
+        comment: '',
+        linkedIssue: null,
+        linkedPR: null,
+        linkedLinearIssue: null,
+        isArchived: false,
+        isUnread: false,
+        isPinned: false,
+        sortOrder: 0,
+        lastActivityAt: 0,
+        parentWorktreeId: null,
+        childWorktreeIds: [],
+        lineage: null,
+        git: { path: '/repo', head: '', branch: 'main', isBare: false, isMainWorktree: true }
+      })
+      const result = await call('orchestration.runCreate', {
+        objective: 'Ship',
+        from: 'term_coord',
+        repoId: 'forged'
+      })
+      expect(result).toMatchObject({ run: { repo_id: 'runtime-repo', worktree_id: 'workspace' } })
+    })
+    it('refuses a coordinator whose workspace changes during scope resolution', async () => {
+      setup(false)
+      const workspace = vi
+        .spyOn(runtime, 'getTerminalWorktreeIdForHandle')
+        .mockReturnValue('workspace')
+      vi.spyOn(runtime, 'showManagedWorktree').mockImplementation(async () => {
+        workspace.mockReturnValue('other')
+        throw new Error('selector_not_found')
+      })
+      await expect(
+        call('orchestration.runCreate', { objective: 'Ship', from: 'term_coord' })
+      ).rejects.toThrow('changed')
+      expect(db.listRuns().runs.some((run) => run.objective === 'Ship')).toBe(false)
+    })
+
     it('creates and binds a Run to the runtime-resolved caller pane', async () => {
       setup(false)
       vi.spyOn(runtime, 'getTerminalPaneKey').mockReturnValue(
