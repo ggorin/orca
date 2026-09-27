@@ -111,6 +111,8 @@ export type ManualRepoOrderEntry = {
 
 /** The active top-level section shown in the main content area. */
 export type TopLevelView =
+  | 'management-overview'
+  | 'project-home'
   | 'terminal'
   | 'settings'
   | 'tasks'
