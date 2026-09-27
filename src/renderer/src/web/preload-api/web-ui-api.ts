@@ -28,7 +28,9 @@ function hostUiUpdates(updates: Partial<PersistedUIState>) {
   return {
     ...omitPairingLocalUiFields(updates),
     // Older hosts reject unknown views and would discard the entire UI update.
-    ...(updates.activeView === 'project-home' ? { activeView: 'terminal' as const } : {})
+    ...(updates.activeView === 'project-home' || updates.activeView === 'management-overview'
+      ? { activeView: 'terminal' as const }
+      : {})
   }
 }
 

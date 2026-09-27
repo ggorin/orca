@@ -4,6 +4,7 @@ import type { TopLevelView } from './ui-chrome-types'
 // persistence boundary that validates values loaded from disk or IPC.
 const TOP_LEVEL_VIEW_LOOKUP: Record<TopLevelView, true> = {
   'project-home': true,
+  'management-overview': true,
   terminal: true,
   settings: true,
   tasks: true,

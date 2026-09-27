@@ -28,9 +28,14 @@ describe('Project home with an older paired host', () => {
     vi.doUnmock('./web-runtime-client')
   })
 
-  it.each(['set', 'setWithAck'] as const)(
-    '%s keeps Project home local while preserving sibling updates on the host',
-    async (method) => {
+  it.each([
+    ['set', 'project-home'],
+    ['setWithAck', 'project-home'],
+    ['set', 'management-overview'],
+    ['setWithAck', 'management-overview']
+  ] as const)(
+    '%s keeps %s local while preserving sibling updates on the host',
+    async (method, activeView) => {
       const received: unknown[] = []
       vi.doMock('./web-runtime-client', () => ({
         WebRuntimeClient: class {
@@ -56,11 +61,11 @@ describe('Project home with an older paired host', () => {
       if (!update) {
         throw new Error(`${method} is unavailable`)
       }
-      await update({ activeView: 'project-home', sidebarWidth: 280 })
+      await update({ activeView, sidebarWidth: 280 })
 
       expect(received).toEqual([{ activeView: 'terminal', sidebarWidth: 280 }])
       expect(JSON.parse(globals.storage.getItem('orca.web.ui.v1') ?? '{}')).toMatchObject({
-        activeView: 'project-home',
+        activeView,
         sidebarWidth: 280
       })
     }

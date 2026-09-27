@@ -108,6 +108,7 @@ export type NewWorkspaceDraft = {
 }
 
 export type UiViewHistory =
+  | 'management-overview'
   | 'project-home'
   | 'terminal'
   | 'settings'

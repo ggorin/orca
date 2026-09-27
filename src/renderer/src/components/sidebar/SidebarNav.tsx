@@ -1,3 +1,4 @@
+import { ManagementOverviewNav } from '../management-overview/ManagementOverviewNav'
 import React from 'react'
 import { BookOpen, CalendarClock, EyeOff, Files, Search, Smartphone } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -120,6 +121,7 @@ const SidebarNav = React.memo(function SidebarNav() {
         </span>
       </button>
       <SetupGuideSidebarEntry />
+      <ManagementOverviewNav />
       <SidebarTaskNavButton />
       {showArtifactsButton ? (
         <ContextMenu>
