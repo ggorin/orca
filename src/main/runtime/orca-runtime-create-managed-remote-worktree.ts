@@ -1,5 +1,7 @@
 // @ts-nocheck -- mechanically split from OrcaRuntimeService; behavior is covered by AST equivalence and characterization tests.
 import { OrcaRuntimeWithCreateManagedWorktree } from './orca-runtime-create-managed-worktree'
+import { linkRuntimeWorkspaceLinearIssue } from './runtime-workspace-linear-link'
+import type { WorkspaceLinearLinkRequest } from '../../shared/linear/workspace-link-request'
 import type { LocalGitExecOptions } from '../git/repo-default-base-ref'
 import type { Repo } from '../../shared/repo-types'
 import type { RuntimeRemoteWorktreeCreateArgs } from './runtime-remote-worktree-create-request'
@@ -142,6 +144,15 @@ export class OrcaRuntimeWithCreateManagedRemoteWorktree extends OrcaRuntimeWithC
       fetchRemote: (repoPath, remote, options) =>
         this.fetchRemoteWithCache(repoPath, remote, options)
     })
+  }
+
+  async linkWorkspaceLinearIssue(request: WorkspaceLinearLinkRequest): Promise<{ linked: true }> {
+    return linkRuntimeWorkspaceLinearIssue(
+      request,
+      this.requireStore(),
+      (selector) => this.resolveWorktreeSelector(selector),
+      (repoId) => (repoId ? this.notifyWorktreesChanged(repoId) : this.notifyReposChanged())
+    )
   }
 
   async updateManagedWorktreeMeta(
