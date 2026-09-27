@@ -18145,5 +18145,20 @@
       "openIssue": "Open issue",
       "executionUnavailable": "Execution association is not available in this view."
     }
-  }
+  },
+  "linear.linkScan.reading": "Reading workspaces…",
+  "linear.linkScan.title": "Find Linear links",
+  "linear.linkScan.description": "Scan registered projects and connected hosts for ticket IDs in workspace names, branches, and available linked PR/MR titles. Review each match before linking. Existing issue links are preserved; Linear tickets are not changed.",
+  "linear.linkScan.account": "Linear workspace",
+  "linear.linkScan.chooseAccount": "Choose a workspace",
+  "linear.linkScan.scan": "Scan workspaces",
+  "linear.linkScan.cancel": "Cancel",
+  "linear.linkScan.connect": "Connect Linear in Settings → Integrations to verify matches.",
+  "linear.linkScan.progress": "Scanning: {{name}}",
+  "linear.linkScan.summary": "{{scanned}} scanned · {{linked}} already linked · {{empty}} without ticket references",
+  "linear.linkScan.empty": "No new matches found in the workspaces scanned.",
+  "linear.linkScan.chooseIssueLabel": "Issue for {{name}}",
+  "linear.linkScan.chooseIssue": "Multiple matches — choose an issue",
+  "linear.linkScan.linked": "Linked",
+  "linear.linkScan.link": "Link selected issue"
 }
